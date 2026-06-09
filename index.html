@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#4a442a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Layihələr">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>SECURITY GROUP · Layihələr</title>
+<style>
+  :root{
+    --gold:#d4af37;
+    --gold-soft:#e8cf7a;
+    --gold-deep:#b8860b;
+    --tile:#4f492c;
+    --tile-2:#5e572f;
+    --line:rgba(212,175,55,.45);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:
+      radial-gradient(circle at 20% 0%,#e4d8af 0%,transparent 55%),
+      radial-gradient(circle at 90% 100%,#d3c694 0%,transparent 50%),
+      linear-gradient(160deg,#ddd0a4 0%,#cabd8d 100%);
+    background-attachment:fixed;
+    color:var(--gold-deep);
+    min-height:100dvh;
+    display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);
+  }
+
+  /* ---- Header ---- */
+  header{text-align:center;padding:14px 0 8px;animation:drop .7s ease both}
+  .logo{
+    width:58px;height:58px;margin:0 auto 8px;border-radius:18px;
+    background:linear-gradient(145deg,#5e572f,#3f3a23);
+    border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Georgia",serif;font-weight:800;font-size:24px;color:var(--gold);
+    box-shadow:0 6px 18px rgba(74,68,42,.45),inset 0 1px 0 rgba(255,255,255,.15);
+    animation:float 4s ease-in-out infinite;
+  }
+  h1{
+    font-size:21px;letter-spacing:1.5px;font-weight:800;
+    background:linear-gradient(90deg,#9a7b0a,var(--gold),#fff2c0,var(--gold),#9a7b0a);
+    background-size:200% auto;-webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+    animation:shine 5s linear infinite;
+  }
+  .sub{font-size:12px;color:#8a6d1f;letter-spacing:.5px;margin-top:3px;opacity:.9}
+
+  /* ---- Section ---- */
+  main{flex:1;width:100%;max-width:520px;margin:0 auto}
+  .sec{
+    font-size:12.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    color:#7a5e10;margin:14px 4px 8px;display:flex;align-items:center;gap:8px;
+  }
+  .sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+  /* ---- Grid ---- */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .tile{
+    position:relative;overflow:hidden;
+    background:linear-gradient(150deg,var(--tile-2),var(--tile));
+    border:1px solid var(--line);border-radius:15px;
+    padding:11px 6px 9px;text-align:center;text-decoration:none;
+    color:var(--gold);
+    box-shadow:0 4px 12px rgba(63,58,35,.28),inset 0 1px 0 rgba(255,255,255,.08);
+    transform:translateY(14px);opacity:0;
+    animation:rise .5s ease forwards;
+    transition:transform .18s ease,box-shadow .18s ease;
+  }
+  .tile:active{transform:scale(.94)!important;box-shadow:0 2px 6px rgba(63,58,35,.3)}
+  @media(hover:hover){.tile:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(63,58,35,.4)}}
+  .tile .ic{font-size:27px;line-height:1;display:block;margin-bottom:6px;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+  .tile .nm{font-size:11.5px;font-weight:700;letter-spacing:.3px;line-height:1.15;
+    color:var(--gold-soft)}
+  /* shimmer sweep */
+  .tile::before{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;
+    background:linear-gradient(115deg,transparent,rgba(255,245,200,.22),transparent);
+    transform:skewX(-18deg);transition:left .6s ease}
+  @media(hover:hover){.tile:hover::before{left:130%}}
+
+  /* ---- Install button ---- */
+  #install{display:none;margin:16px auto 4px;padding:9px 18px;border:none;cursor:pointer;
+    background:linear-gradient(145deg,#5e572f,#3f3a23);color:var(--gold);
+    border:1px solid var(--gold);border-radius:30px;font-size:12.5px;font-weight:700;
+    letter-spacing:.5px;box-shadow:0 4px 12px rgba(63,58,35,.35)}
+  #install:active{transform:scale(.96)}
+
+  /* ---- Footer ---- */
+  footer{text-align:center;padding:14px 0 10px;font-size:11.5px;color:#8a6d1f;animation:drop .9s ease both}
+  footer a{color:var(--gold-deep);font-weight:700;text-decoration:none;border-bottom:1px dotted var(--gold-deep)}
+  footer .hl{color:#7a5e10}
+
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  @keyframes shine{to{background-position:200% center}}
+  @keyframes rise{to{transform:translateY(0);opacity:1}}
+  @keyframes drop{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SG</div>
+  <h1>SECURITY&nbsp;GROUP</h1>
+  <div class="sub">Layihələr · Proqram Təminatı Mərkəzi</div>
+</header>
+
+<main>
+  <div class="sec">🧠 Psixoloji proyektlər</div>
+  <div class="grid" id="psy"></div>
+
+  <div class="sec">💼 Digər proyektlər</div>
+  <div class="grid" id="oth"></div>
+
+  <button id="install">⬇️ Telefona yüklə</button>
+</main>
+
+<footer>
+  By <a href="https://instagram.com/s_akhundoff" target="_blank" rel="noopener">s_akhundoff</a>
+  · <span class="hl">SECURITY GROUP © 2026</span>
+</footer>
+
+<script>
+  const psy=[
+    {n:"AN Mərkəz",   ic:"🏛️", u:"https://samir210-az.github.io/site/"},
+    {n:"TTAP",        ic:"🧩", u:"https://samir210-az.github.io/AN/"},
+    {n:"Denver II",   ic:"📋", u:"https://samir210-az.github.io/goog/"},
+    {n:"Erkən İnkişaf",ic:"🌱",u:"https://samir210-az.github.io/TEST/"},
+    {n:"Erkən Müdaxilə",ic:"🧭",u:"https://samir210-az.github.io/erken-mudaxile/"},
+    {n:"CBT",         ic:"🧠", u:"https://samir210-az.github.io/cbt/"},
+    {n:"NeuroCBT",    ic:"📊", u:"https://samir210-az.github.io/saas/"},
+    {n:"Səsim",       ic:"🗣️", u:"https://samir210-az.github.io/sesim/"},
+    {n:"AI Agent",    ic:"🤖", u:"https://samir210-az.github.io/-agent/"}
+  ];
+  const oth=[
+    {n:"MEYANPARFUM", ic:"🌸", u:"https://samir210-az.github.io/MEYANPARFUM/"},
+    {n:"Market POS",  ic:"🛒", u:"https://samir210-az.github.io/Market/MARKET.html"},
+    {n:"Gözəllik Salonu",ic:"💅",u:"https://samir210-az.github.io/Satis/MARKET.html"},
+    {n:"Arıqlama",    ic:"⚖️", u:"https://samir210-az.github.io/saglam/"},
+    {n:"SECURITY GROUP",ic:"🛡️",u:"https://samir210-az.github.io/Esas/"}
+  ];
+  function build(list,id){
+    const box=document.getElementById(id);
+    list.forEach((p,i)=>{
+      const a=document.createElement("a");
+      a.className="tile";a.href=p.u;a.target="_blank";a.rel="noopener";
+      a.style.animationDelay=(i*0.05)+"s";
+      a.innerHTML=`<span class="ic">${p.ic}</span><span class="nm">${p.n}</span>`;
+      box.appendChild(a);
+    });
+  }
+  build(psy,"psy");build(oth,"oth");
+
+  // PWA install prompt
+  let dp=null;const ib=document.getElementById("install");
+  window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;ib.style.display="block"});
+  ib.addEventListener("click",async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;ib.style.display="none"});
+
+  if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
+</script>
+</body>
+</html>
