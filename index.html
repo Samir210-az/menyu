@@ -285,10 +285,7 @@ main{
    ============================================================ */
 .tile{
   position:relative;overflow:hidden;
-  background:linear-gradient(145deg,
-    rgba(255,255,255,0.07) 0%,
-    rgba(255,255,255,0.03) 100%
-  );
+  background:linear-gradient(145deg,rgba(255,255,255,0.07) 0%,rgba(255,255,255,0.03) 100%);
   border:1px solid var(--c-border);
   border-radius:var(--r-lg);
   padding:16px 8px 13px;
@@ -298,70 +295,73 @@ main{
   box-shadow:var(--shadow-sm),var(--shadow-inset);
   opacity:0;transform:translateY(20px) scale(0.95);
   animation:tile-rise var(--t-slow) var(--ease-back) forwards;
-  transition:
-    transform var(--t-mid) var(--ease-out),
-    box-shadow var(--t-mid) var(--ease-out),
-    border-color var(--t-mid) var(--ease-out),
-    background var(--t-mid) var(--ease-out);
-  cursor:pointer;
-  will-change:transform;
+  transition:transform var(--t-mid) var(--ease-out),box-shadow var(--t-mid) var(--ease-out),border-color var(--t-mid) var(--ease-out),background var(--t-mid) var(--ease-out);
+  cursor:pointer;will-change:transform;
 }
-@keyframes tile-rise{
-  to{opacity:1;transform:translateY(0) scale(1);}
-}
-.tile:active{
-  transform:scale(0.91) !important;
-  box-shadow:var(--shadow-sm) !important;
-}
-@media(hover:hover){
-  .tile:hover{
-    background:linear-gradient(145deg,
-      rgba(210,165,93,0.12) 0%,
-      rgba(106,0,0,0.15) 100%
-    );
-    border-color:var(--c-border2);
-    transform:translateY(-5px) scale(1.03);
-    box-shadow:var(--shadow-md),var(--shadow-gold),var(--shadow-inset);
-  }
-}
+@keyframes tile-rise{to{opacity:1;transform:translateY(0) scale(1);}}
+.tile:active{transform:scale(0.91)!important;box-shadow:var(--shadow-sm)!important;}
 
-/* Tile shimmer */
+/* ── Animasiya növləri ── */
+/* 1: Yuxarı sürüş */
+.tile[data-anim="lift"]:hover{transform:translateY(-7px) scale(1.04);box-shadow:var(--shadow-md),var(--shadow-gold),var(--shadow-inset);border-color:var(--c-border2);background:linear-gradient(145deg,rgba(210,165,93,0.13),rgba(106,0,0,0.14));}
+/* 2: Pulse döyünmə */
+.tile[data-anim="pulse"]:hover{animation:tile-pulse 0.6s var(--ease-back) forwards;border-color:var(--c-border2);background:linear-gradient(145deg,rgba(210,165,93,0.13),rgba(106,0,0,0.14));}
+@keyframes tile-pulse{0%{transform:scale(1);}30%{transform:scale(1.07);}60%{transform:scale(0.97);}100%{transform:scale(1.03) translateY(-4px);}}
+/* 3: Döndər tilt */
+.tile[data-anim="tilt"]:hover{transform:perspective(400px) rotateX(-6deg) rotateY(4deg) scale(1.04) translateY(-4px);box-shadow:var(--shadow-md),0 20px 40px rgba(210,165,93,0.15);border-color:var(--c-border2);}
+/* 4: Sıxıl-açıl */
+.tile[data-anim="squeeze"]:hover{animation:tile-squeeze 0.5s var(--ease-back) forwards;border-color:var(--c-border2);}
+@keyframes tile-squeeze{0%{transform:scale(1);}25%{transform:scaleX(0.9) scaleY(1.08);}60%{transform:scaleX(1.05) scaleY(0.96);}100%{transform:scale(1.03) translateY(-5px);}}
+/* 5: Parıltı glow */
+.tile[data-anim="glow"]:hover{transform:translateY(-5px) scale(1.03);box-shadow:0 0 0 1.5px var(--gold-400),0 0 24px var(--gold-glow),var(--shadow-md);border-color:var(--gold-400);background:linear-gradient(145deg,rgba(210,165,93,0.16),rgba(106,0,0,0.1));}
+/* 6: Sola-sağa sallan */
+.tile[data-anim="wobble"]:hover{animation:tile-wobble 0.55s var(--ease-out) forwards;border-color:var(--c-border2);}
+@keyframes tile-wobble{0%{transform:translateX(0);}20%{transform:translateX(-5px) rotate(-2deg);}40%{transform:translateX(5px) rotate(2deg);}60%{transform:translateX(-3px) rotate(-1deg);}80%{transform:translateX(3px) rotate(1deg);}100%{transform:translateX(0) translateY(-4px)scale(1.03);}}
+/* 7: Flip ikon */
+.tile[data-anim="flip"]:hover{transform:translateY(-5px) scale(1.03);border-color:var(--c-border2);background:linear-gradient(145deg,rgba(210,165,93,0.13),rgba(106,0,0,0.14));}
+.tile[data-anim="flip"]:hover .ic{animation:icon-flip 0.5s var(--ease-back);}
+@keyframes icon-flip{0%{transform:rotateY(0);}50%{transform:rotateY(180deg) scale(1.2);}100%{transform:rotateY(360deg) scale(1.1);}}
+/* 8: Bounce atıl */
+.tile[data-anim="bounce"]:hover{animation:tile-bounce 0.55s var(--ease-back) forwards;border-color:var(--c-border2);}
+@keyframes tile-bounce{0%{transform:translateY(0);}30%{transform:translateY(-12px) scale(1.05);}55%{transform:translateY(-3px) scale(0.98);}75%{transform:translateY(-8px) scale(1.03);}90%{transform:translateY(-2px);}100%{transform:translateY(-6px) scale(1.03);}}
+
+/* Shimmer sweep (hamısında) */
 .tile::before{
-  content:'';position:absolute;
-  top:0;left:-120%;width:55%;height:100%;
-  background:linear-gradient(115deg,
-    transparent,
-    rgba(210,165,93,0.12),
-    transparent
-  );
-  transform:skewX(-20deg);
-  transition:left 0.6s var(--ease-out);
-  pointer-events:none;
+  content:'';position:absolute;top:0;left:-120%;width:55%;height:100%;
+  background:linear-gradient(115deg,transparent,rgba(210,165,93,0.13),transparent);
+  transform:skewX(-20deg);transition:left 0.55s var(--ease-out);pointer-events:none;
 }
-@media(hover:hover){.tile:hover::before{left:140%;}}
+.tile:hover::before{left:140%;}
 
-/* Tile top accent line */
+/* Top accent line */
 .tile::after{
-  content:'';position:absolute;
-  top:0;left:20%;right:20%;height:1px;
+  content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
   background:linear-gradient(90deg,transparent,rgba(210,165,93,0.4),transparent);
-  border-radius:1px;
+}
+
+/* Particle burst on click */
+.tile .burst{
+  position:absolute;top:50%;left:50%;
+  width:4px;height:4px;border-radius:50%;
+  background:var(--gold-300);pointer-events:none;
+  transform:translate(-50%,-50%) scale(0);opacity:0;
+}
+.tile.clicked .burst{animation:burst-out 0.5s ease-out forwards;}
+@keyframes burst-out{
+  0%{transform:translate(-50%,-50%) scale(0);opacity:1;}
+  100%{transform:translate(calc(-50% + var(--bx)),calc(-50% + var(--by))) scale(0.5);opacity:0;}
 }
 
 .tile .ic{
-  font-size:28px;line-height:1;
-  display:block;margin-bottom:8px;
+  font-size:28px;line-height:1;display:block;margin-bottom:8px;
   filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4));
   transition:transform var(--t-mid) var(--ease-back);
 }
-@media(hover:hover){.tile:hover .ic{transform:scale(1.15) translateY(-2px);}}
+.tile:not([data-anim="flip"]):hover .ic{transform:scale(1.15) translateY(-2px);}
 
 .tile .nm{
-  font-family:var(--font-body);
-  font-size:10.5px;font-weight:700;
-  line-height:1.25;
-  color:var(--gold-200);
-  letter-spacing:0.1px;
+  font-family:var(--font-body);font-size:10.5px;font-weight:700;
+  line-height:1.25;color:var(--gold-200);letter-spacing:0.1px;
 }
 
 /* ============================================================
@@ -481,6 +481,7 @@ const oth=[
   {n:"Test Kataloqu",    ic:"📚",  u:"https://samir210-az.github.io/Esas/"}
 ];
 
+const ANIMS=["lift","pulse","tilt","squeeze","glow","wobble","flip","bounce"];
 function build(list,id){
   const box=document.getElementById(id);
   list.forEach((p,i)=>{
@@ -488,7 +489,23 @@ function build(list,id){
     a.className="tile";
     a.href=p.u;a.target="_blank";a.rel="noopener";
     a.style.animationDelay=(i*0.06)+"s";
+    a.dataset.anim=ANIMS[i%ANIMS.length];
     a.innerHTML=`<span class="ic">${p.ic}</span><span class="nm">${p.n}</span>`;
+    // Particle burst on click
+    a.addEventListener("pointerdown",function(e){
+      for(let k=0;k<6;k++){
+        const b=document.createElement("div");
+        b.className="burst";
+        const ang=k*(Math.PI*2/6);
+        const dist=30+Math.random()*20;
+        b.style.setProperty("--bx",Math.cos(ang)*dist+"px");
+        b.style.setProperty("--by",Math.sin(ang)*dist+"px");
+        a.appendChild(b);
+        setTimeout(()=>b.remove(),600);
+      }
+      a.classList.add("clicked");
+      setTimeout(()=>a.classList.remove("clicked"),600);
+    });
     box.appendChild(a);
   });
 }
