@@ -55,6 +55,9 @@ button.action-btn{padding:6px 10px;border:none;border-radius:6px;font-size:12px;
 <div id="customers-tab">
 <div class="card">
 <h3>Qeydiyyat Etmiş Müştərilər</h3>
+<div style="margin-bottom:12px">
+<button style="background:#444;padding:10px 16px;border:none;border-radius:8px;color:#fff;cursor:pointer;font-weight:600" onclick="loadAllCustomers()">🔄 GitHub-dan Yüklə</button>
+</div>
 <div class="search">
 <input type="text" id="searchInput" placeholder="Mərkəz adı ilə axtar..." onkeyup="filterCustomers()">
 </div>
@@ -86,6 +89,7 @@ button.action-btn{padding:6px 10px;border:none;border-radius:6px;font-size:12px;
 </div>
 </div>
 
+<script src="https://samir210-az.github.io/menyu/customers-data.js"></script>
 <script>
 const REPOS = {
   "aba-terapiya": { name:"ABA Terapiya", tools:["vb-mapp","ablls-r","afls","fba","vineland","peak"] },
@@ -122,9 +126,24 @@ function switchTab(tab){
   if (tab === 'usage') loadUsageReport();
 }
 
-function loadCustomers(){
-  allCustomers = JSON.parse(localStorage.getItem('customers') || '{}');
-  renderCustomers();
+async function loadAllCustomers(){
+  try {
+    // GitHub-dan oxu
+    const res = await fetch('https://raw.githubusercontent.com/Samir210-az/menyu/main/customers-data.js');
+    const text = await res.text();
+    
+    // window.CUSTOMERS_DB-ni çıxart
+    const match = text.match(/window\.CUSTOMERS_DB\s*=\s*(\{[\s\S]*\});?\s*$/m);
+    if (match) {
+      allCustomers = eval('(' + match[1] + ')');
+    } else {
+      allCustomers = {};
+    }
+    
+    renderCustomers();
+  } catch(e) {
+    alert('GitHub-dan yükləmə alınmadı: ' + e.message);
+  }
 }
 
 function renderCustomers(){
@@ -257,11 +276,13 @@ function loadUsageReport(){
 }
 
 function saveCustomers(){
+  // localStorage-ə yaz (temp)
   localStorage.setItem('customers', JSON.stringify(allCustomers));
+  // GitHub-a yazmalı (sonra)
 }
 
 if (checkAdmin()) {
-  loadCustomers();
+  loadAllCustomers();
 }
 </script>
 </body></html>
