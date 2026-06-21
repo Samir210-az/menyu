@@ -1,0 +1,228 @@
+<!DOCTYPE html><html lang="az"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mərkəzi Lisenziya İdarəetməsi — AN Psixoloji</title>
+<style>
+*{box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+body{margin:0;background:#f6f1ec;color:#2a1414;padding:20px}
+.wrap{max-width:800px;margin:0 auto}
+h1{color:#6A0000;font-size:24px;margin-bottom:4px}
+.sub{color:#777;font-size:14px;margin-bottom:24px}
+.card{background:#fff;border-radius:14px;padding:22px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.card h3{margin:0 0 14px;font-size:16px;color:#6A0000}
+label{display:block;font-size:13px;color:#555;margin-bottom:5px;margin-top:12px}
+input,select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:8px}
+button{width:100%;padding:12px;border:none;border-radius:8px;background:#6A0000;color:#fff;font-size:15px;cursor:pointer;margin-bottom:10px}
+button:hover{background:#8a2020}
+.token-row{display:flex;gap:8px}
+.token-row input{flex:1}
+.token-row button{width:auto;padding:10px 16px;margin:0}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+th,td{padding:8px 6px;border-bottom:1px solid #eee;text-align:left}
+th{background:#f5f5f5;font-weight:600;color:#6A0000}
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;background:#e8f5e9;color:#2e7d32}
+.msg{margin-top:10px;font-size:13px;text-align:center;padding:10px;border-radius:6px}
+.msg.ok{background:#e8f5e9;color:#27ae60}.msg.err{background:#fdecea;color:#c0392b}
+.del{color:#c0392b;cursor:pointer;font-size:12px}
+code{background:#f1e2e2;padding:2px 6px;border-radius:4px;font-size:12px}
+.repo-section{margin-bottom:24px;border:1px solid #ddd;border-radius:10px;padding:16px;background:#fafafa}
+.repo-title{font-size:15px;font-weight:700;color:#6A0000;margin-bottom:12px}
+</style></head><body>
+<div class="wrap">
+<h1>🔐 Mərkəzi Lisenziya İdarəetməsi</h1>
+<div class="sub">AN Psixoloji qiymətləndirmə alətləri — 5 repo, bir paneldən idarəetmə</div>
+
+<div class="card">
+<h3>GitHub Token</h3>
+<div class="token-row">
+<input type="password" id="ghToken" placeholder="ghp_... (yalnız bu sessiyada saxlanılır)">
+<button onclick="saveToken()">Saxla</button>
+</div>
+<div class="msg" id="tokenMsg"></div>
+</div>
+
+<div class="card">
+<h3>Yeni Lisenziya Yarat</h3>
+<label>Repo Seç</label>
+<select id="repoSelect" onchange="updateToolSelect()">
+<option value="aba-terapiya">ABA Terapiya (6 alət)</option>
+<option value="AN">TTAP</option>
+<option value="goog">Denver II</option>
+<option value="denever">Denver Arxiv</option>
+<option value="TEST">Erkən İnkişaf</option>
+<option value="cbt">CBT</option>
+</select>
+
+<label>Alət Seç</label>
+<select id="toolSelect"></select>
+
+<label>Müştəri adı</label>
+<input type="text" id="clientName" placeholder="məs. Günəş İnkişaf Mərkəzi">
+
+<label>Müddət (boş = sonsuz)</label>
+<input type="number" id="durationDays" placeholder="məs. 365 (gün)">
+
+<button onclick="createLicense()">Lisenziya Yarat</button>
+<div class="msg" id="createMsg"></div>
+</div>
+
+<div class="card">
+<h3>Mövcud Lisenziyalar</h3>
+<button style="background:#444;margin-bottom:8px" onclick="loadAllLicenses()">🔄 Hamısını Yenilə</button>
+
+<div id="licensesContainer"></div>
+</div>
+</div>
+
+<script>
+const REPOS = {
+  "aba-terapiya": { tools:["vb-mapp","ablls-r","afls","fba","vineland","peak"] },
+  "AN": { tools:["ttap"] },
+  "goog": { tools:["denver"] },
+  "denever": { tools:["denever-arxiv"] },
+  "TEST": { tools:["test-erken"] },
+  "cbt": { tools:["cbt"] }
+};
+
+function getToken(){ return sessionStorage.getItem('gh_token') || ''; }
+function saveToken(){
+  const t = document.getElementById('ghToken').value.trim();
+  if (!t) return;
+  sessionStorage.setItem('gh_token', t);
+  document.getElementById('tokenMsg').className = 'msg ok';
+  document.getElementById('tokenMsg').textContent = 'Token saxlanıldı (yalnız bu sessiyada).';
+  loadAllLicenses();
+}
+
+function updateToolSelect(){
+  const repo = document.getElementById('repoSelect').value;
+  const tools = REPOS[repo].tools;
+  const sel = document.getElementById('toolSelect');
+  sel.innerHTML = tools.map(t=>`<option value="${t}">${t.toUpperCase()}</option>`).join('');
+}
+
+window.onload = function(){
+  updateToolSelect();
+  if (getToken()) {
+    document.getElementById('ghToken').value = getToken();
+    loadAllLicenses();
+  }
+};
+
+function genKey(toolId){
+  const rand = Math.random().toString(36).substring(2,8).toUpperCase();
+  const year = new Date().getFullYear();
+  return `AN-${year}-${toolId.toUpperCase()}-${rand}`;
+}
+
+async function fetchFile(repo){
+  const res = await fetch(`https://api.github.com/repos/Samir210-az/${repo}/contents/licenses-data.js`, {
+    headers:{ Authorization: `token ${getToken()}` }
+  });
+  if (!res.ok) throw new Error('Fayl tapılmadı');
+  const data = await res.json();
+  const content = decodeURIComponent(escape(atob(data.content)));
+  return { content, sha: data.sha };
+}
+
+function parseDB(content){
+  const match = content.match(/window\.LICENSE_DB\s*=\s*(\{[\s\S]*\});?\s*$/m);
+  if (!match) return {};
+  try { return eval('(' + match[1] + ')'); } catch(e){ return {}; }
+}
+
+function buildFileContent(db){
+  let body = "window.LICENSE_DB = {\n";
+  const entries = Object.keys(db).map(key=>{
+    const e = db[key];
+    return `  "${key}": { toolId:"${e.toolId}", clientName:${JSON.stringify(e.clientName||'')}, expiresAt:${e.expiresAt||'null'} }`;
+  });
+  body += entries.join(",\n") + "\n};\n";
+  return body;
+}
+
+async function pushFile(repo, content, sha, message){
+  const res = await fetch(`https://api.github.com/repos/Samir210-az/${repo}/contents/licenses-data.js`, {
+    method:'PUT',
+    headers:{ Authorization: `token ${getToken()}`, 'Content-Type':'application/json' },
+    body: JSON.stringify({ message, content: btoa(unescape(encodeURIComponent(content))), sha })
+  });
+  if (!res.ok) throw new Error('Yükləmə alınmadı');
+}
+
+async function createLicense(){
+  const msg = document.getElementById('createMsg');
+  try {
+    const repo = document.getElementById('repoSelect').value;
+    const toolId = document.getElementById('toolSelect').value;
+    const clientName = document.getElementById('clientName').value.trim();
+    const days = document.getElementById('durationDays').value;
+    const key = genKey(toolId);
+    const expiresAt = days ? (Date.now() + parseInt(days)*86400000) : null;
+
+    const { content, sha } = await fetchFile(repo);
+    const db = parseDB(content);
+    db[key] = { toolId, clientName, expiresAt };
+    const newContent = buildFileContent(db);
+    await pushFile(repo, newContent, sha, `Add license ${key}`);
+
+    msg.className = 'msg ok';
+    msg.innerHTML = `✓ Yaradıldı: <code>${key}</code>`;
+    document.getElementById('clientName').value = '';
+    document.getElementById('durationDays').value = '';
+    loadAllLicenses();
+  } catch(e){
+    msg.className = 'msg err';
+    msg.textContent = 'Xəta: ' + e.message;
+  }
+}
+
+async function deleteLicense(repo, key){
+  if (!confirm(`"${key}" silinsin?`)) return;
+  try {
+    const { content, sha } = await fetchFile(repo);
+    const db = parseDB(content);
+    delete db[key];
+    const newContent = buildFileContent(db);
+    await pushFile(repo, newContent, sha, `Remove license ${key}`);
+    loadAllLicenses();
+  } catch(e){ alert('Xəta: ' + e.message); }
+}
+
+async function loadAllLicenses(){
+  const cont = document.getElementById('licensesContainer');
+  cont.innerHTML = '';
+  
+  for (const [repo, cfg] of Object.entries(REPOS)) {
+    try {
+      const { content } = await fetchFile(repo);
+      const db = parseDB(content);
+      
+      const repoDiv = document.createElement('div');
+      repoDiv.className = 'repo-section';
+      
+      let html = `<div class="repo-title">${repo} (${Object.keys(db).length} lisenziya)</div>`;
+      
+      if (Object.keys(db).length === 0) {
+        html += '<div style="color:#999;font-size:13px">Hələ lisenziya yoxdur</div>';
+      } else {
+        html += '<table><thead><tr><th>Açar</th><th>Alət</th><th>Müştəri</th><th>Status</th><th></th></tr></thead><tbody>';
+        for (const [key, e] of Object.entries(db)) {
+          const expired = e.expiresAt && Date.now() > e.expiresAt;
+          html += `<tr><td><code>${key}</code></td><td>${e.toolId}</td><td>${e.clientName||'-'}</td>
+            <td><span class="badge" style="${expired?'background:#fdecea;color:#c0392b':''}">${expired?'Bitib':'Aktiv'}</span></td>
+            <td><span class="del" onclick="deleteLicense('${repo}','${key}')">Sil</span></td></tr>`;
+        }
+        html += '</tbody></table>';
+      }
+      
+      repoDiv.innerHTML = html;
+      cont.appendChild(repoDiv);
+    } catch(e){
+      const repoDiv = document.createElement('div');
+      repoDiv.className = 'repo-section';
+      repoDiv.innerHTML = `<div class="repo-title">${repo}</div><div style="color:#c0392b;font-size:13px">Xəta: ${e.message}</div>`;
+      cont.appendChild(repoDiv);
+    }
+  }
+}
+</script>
+</body></html>
