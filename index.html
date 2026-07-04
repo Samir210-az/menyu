@@ -92,6 +92,8 @@ body{
    ============================================================ */
 .bg-canvas{
   position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  transition:transform 0.9s cubic-bezier(0.16,1,0.3,1);
+  will-change:transform;
 }
 .bg-orb{
   position:absolute;border-radius:50%;filter:blur(80px);
@@ -545,6 +547,28 @@ ib.addEventListener("click",async()=>{
 
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+
+// Parallax background — mouse move (desktop) + gyroscope tilt (mobile)
+const bgCanvas=document.querySelector(".bg-canvas");
+if(bgCanvas){
+  let px=0,py=0;
+  function applyParallax(x,y){
+    px+=(x-px)*0.08;py+=(y-py)*0.08;
+    bgCanvas.style.transform=`translate(${px}px,${py}px)`;
+    requestAnimationFrame(()=>{});
+  }
+  window.addEventListener("pointermove",e=>{
+    const nx=(e.clientX/window.innerWidth-0.5)*30;
+    const ny=(e.clientY/window.innerHeight-0.5)*30;
+    bgCanvas.style.transform=`translate(${nx}px,${ny}px)`;
+  });
+  window.addEventListener("deviceorientation",e=>{
+    if(e.gamma===null||e.beta===null)return;
+    const nx=Math.max(-15,Math.min(15,e.gamma))*1.2;
+    const ny=Math.max(-15,Math.min(15,e.beta-45))*0.6;
+    bgCanvas.style.transform=`translate(${nx}px,${ny}px)`;
+  },{passive:true});
 }
 </script>
 </body>
