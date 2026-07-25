@@ -406,6 +406,55 @@ footer a:hover{color:var(--gold-200);}
 footer .hl{color:rgba(210,165,93,0.3);}
 
 /* ============================================================
+   LOCK SCREEN
+   ============================================================ */
+#lock{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;text-align:center;
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(106,0,0,0.55), transparent 55%),
+    radial-gradient(ellipse at 90% 0%, rgba(210,165,93,0.10), transparent 45%),
+    var(--c-bg);
+}
+#lock .seal-wrap{position:relative;width:84px;height:84px;margin-bottom:22px;}
+#lock .seal-ring{
+  position:absolute;inset:-6px;border-radius:50%;
+  background:conic-gradient(from 0deg, transparent 0deg, var(--gold-400) 60deg, transparent 130deg, transparent 180deg, var(--gold-300) 240deg, transparent 310deg, transparent 360deg);
+  animation:ring-spin 8s linear infinite;opacity:.75;
+}
+#lock .seal{
+  position:relative;z-index:1;width:84px;height:84px;border-radius:50%;
+  background:linear-gradient(145deg, rgba(210,165,93,0.15) 0%, rgba(106,0,0,0.3) 50%, rgba(210,165,93,0.08) 100%);
+  border:1.5px solid var(--c-border2);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-md),var(--shadow-inset),0 0 30px var(--gold-glow);
+  animation:logo-float 5s ease-in-out infinite;
+}
+#lock .seal svg{width:32px;height:32px;stroke:var(--gold-300);}
+#lock h1.lock-title{
+  font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:1px;
+  color:var(--gold-200);margin-bottom:8px;
+}
+#lock .lock-sub{color:rgba(210,165,93,0.55);font-size:13px;margin-bottom:26px;max-width:260px;line-height:1.5;}
+#lockForm{display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px;}
+#lockForm input{
+  background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md);
+  padding:15px 18px;color:var(--gold-100);font-size:18px;letter-spacing:.35em;text-align:center;
+  outline:none;transition:.25s;font-family:var(--font-mono);
+}
+#lockForm input:focus{border-color:var(--gold-400);box-shadow:0 0 0 3px var(--gold-glow2);}
+#lockForm button{
+  border:none;border-radius:var(--r-md);padding:15px 18px;font-size:14.5px;font-weight:800;
+  cursor:pointer;letter-spacing:.03em;font-family:var(--font-body);
+  background:linear-gradient(135deg,var(--gold-400),var(--gold-300));color:var(--c-bg);
+  box-shadow:0 6px 22px var(--gold-glow);transition:transform var(--t-fast);
+}
+#lockForm button:active{transform:scale(.97);}
+#lockMsg{min-height:18px;font-size:12.5px;color:#ff8b8b;margin-top:2px;}
+#lock .lock-brand{font-size:11px;font-weight:800;letter-spacing:.18em;color:rgba(210,165,93,0.45);text-transform:uppercase;margin-top:28px;}
+
+/* ============================================================
    SCROLLBAR
    ============================================================ */
 ::-webkit-scrollbar{width:4px;}
@@ -414,6 +463,27 @@ footer .hl{color:rgba(210,165,93,0.3);}
 </style>
 </head>
 <body>
+
+<!-- LOCK SCREEN -->
+<div id="lock">
+  <div class="seal-wrap">
+    <div class="seal-ring"></div>
+    <div class="seal">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="10" width="16" height="10" rx="2"></rect>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+      </svg>
+    </div>
+  </div>
+  <h1 class="lock-title">Giriş qorunur</h1>
+  <p class="lock-sub">Bu panel yalnız sənin üçündür. Davam etmək üçün PIN daxil et.</p>
+  <form id="lockForm" autocomplete="off">
+    <input type="password" id="pinInput" placeholder="••••••" inputmode="numeric" autocomplete="off" maxlength="12">
+    <button type="submit">Aç</button>
+  </form>
+  <div id="lockMsg"></div>
+  <div class="lock-brand">SECURITY GROUP</div>
+</div>
 
 <!-- Animated background -->
 <div class="bg-canvas" aria-hidden="true">
@@ -457,6 +527,40 @@ footer .hl{color:rgba(210,165,93,0.3);}
 </footer>
 
 <script>
+/* ---------- Giriş qoruması (PIN) ---------- */
+(function(){
+  const PIN_HASH = 'ae049299b033187c4c74ef5fd519277e1f79d19fbf681cc0c66d8506932405ae';
+  const LS_KEY = 'menyu_unlocked_v1';
+  const lockEl = document.getElementById('lock');
+  const form = document.getElementById('lockForm');
+  const input = document.getElementById('pinInput');
+  const msg = document.getElementById('lockMsg');
+
+  async function sha256(text){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
+  if(localStorage.getItem(LS_KEY) === '1'){
+    lockEl.style.display = 'none';
+  } else {
+    setTimeout(()=>input.focus(), 300);
+  }
+
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const hash = await sha256(input.value.trim());
+    if(hash === PIN_HASH){
+      localStorage.setItem(LS_KEY, '1');
+      lockEl.style.display = 'none';
+    } else {
+      msg.textContent = 'PIN yanlışdır.';
+      input.value = '';
+      input.focus();
+    }
+  });
+})();
+
 const psy=[
   {n:"AN Paketlər",      ic:"📦", u:"https://samir210-az.github.io/an-paketler/"},
   {n:"AN Mərkəz",        ic:"🏛️", u:"https://samir210-az.github.io/site/"},
