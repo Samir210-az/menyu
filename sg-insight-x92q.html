@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Sistem Jurnalı</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c-bg:#0d0208; --c-bg2:#160510;
+  --c-surface:rgba(255,255,255,0.04); --c-surface2:rgba(255,255,255,0.07);
+  --c-border:rgba(210,165,93,0.18); --c-border2:rgba(210,165,93,0.35);
+  --gold-200:#f2cc7a; --gold-300:#e6b04a; --gold-400:#d2a55d; --gold-500:#c4922a;
+  --bordo-500:#6a0000; --bordo-400:#8b0000;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100dvh}
+body{
+  font-family:var(--font-body);background:var(--c-bg);color:var(--gold-200);
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);overflow-x:hidden;
+}
+.bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(90px);animation:drift 20s ease-in-out infinite}
+.bg-orb-1{width:50vw;height:50vw;max-width:380px;max-height:380px;background:radial-gradient(circle,rgba(106,0,0,.5),transparent 70%);top:-10%;left:-10%}
+.bg-orb-2{width:45vw;height:45vw;max-width:340px;max-height:340px;background:radial-gradient(circle,rgba(210,165,93,.12),transparent 70%);bottom:-8%;right:-8%;animation-delay:-9s}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(4%,6%) scale(1.06)}}
+
+/* ---- Lock screen ---- */
+#lock{
+  position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 20%,var(--c-bg2),var(--c-bg));padding:24px;text-align:center;
+  animation:fadeIn .5s ease both;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.lock-icon{width:64px;height:64px;border-radius:20px;background:linear-gradient(145deg,rgba(210,165,93,.15),rgba(106,0,0,.3));
+  border:1.5px solid var(--c-border2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  box-shadow:0 8px 32px rgba(210,165,93,.15)}
+.lock-icon svg{width:28px;height:28px;stroke:var(--gold-300)}
+.lock-title{font-family:var(--font-display);font-weight:800;font-size:20px;letter-spacing:1px;color:var(--gold-200);margin-bottom:6px}
+.lock-sub{font-size:13px;color:rgba(242,204,122,.6);margin-bottom:26px;max-width:280px}
+#lockForm{display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px}
+#pinInput{
+  background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:14px;padding:14px 16px;
+  color:var(--gold-200);font-family:var(--font-mono);font-size:20px;text-align:center;letter-spacing:6px;outline:none;
+}
+#pinInput:focus{border-color:var(--gold-400)}
+#lockForm button{
+  background:linear-gradient(135deg,var(--gold-400),var(--gold-500));border:none;border-radius:14px;padding:13px;
+  font-weight:700;font-size:14px;color:#1a0410;cursor:pointer;letter-spacing:.5px;
+}
+#lockMsg{min-height:18px;font-size:13px;color:#e77;margin-top:4px}
+
+/* ---- Dashboard ---- */
+main{display:none;position:relative;z-index:2;padding:22px 16px 60px;max-width:960px;margin:0 auto}
+header.dh{text-align:center;margin-bottom:22px}
+header.dh h1{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--gold-200);letter-spacing:1px}
+header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-family:var(--font-mono)}
+
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:var(--c-surface);border:1px solid var(--c-border);border-radius:14px;padding:14px 8px;text-align:center}
+.kpi b{display:block;font-size:22px;font-family:var(--font-display);color:var(--gold-300)}
+.kpi span{font-size:10px;color:rgba(242,204,122,.55);text-transform:uppercase;letter-spacing:.5px}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.filters input,.filters select{
+  flex:1;min-width:110px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;
+  padding:9px 12px;color:var(--gold-200);font-size:13px;font-family:var(--font-body);outline:none;
+}
+.filters input:focus,.filters select:focus{border-color:var(--gold-400)}
+
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{
+  background:var(--c-surface);border:1px solid var(--c-border);border-radius:14px;padding:12px 14px;
+  display:grid;grid-template-columns:1fr auto;gap:4px 10px;animation:rowIn .4s ease both;
+}
+@keyframes rowIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.row .top{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--gold-200)}
+.badge{font-size:10px;padding:2px 8px;border-radius:999px;font-family:var(--font-mono);letter-spacing:.3px}
+.badge.pv{background:rgba(210,165,93,.15);color:var(--gold-300)}
+.badge.pc{background:rgba(106,0,0,.35);color:#ff8f8f}
+.row .meta{grid-column:1/-1;font-size:11.5px;color:rgba(242,204,122,.55);font-family:var(--font-mono);display:flex;flex-wrap:wrap;gap:10px}
+.row .meta b{color:rgba(242,204,122,.8);font-weight:600}
+.row time{font-size:11px;color:rgba(242,204,122,.4);white-space:nowrap;font-family:var(--font-mono)}
+
+.empty{text-align:center;padding:40px 20px;color:rgba(242,204,122,.4);font-size:13px}
+.loading{text-align:center;padding:30px;color:rgba(242,204,122,.5);font-size:13px;font-family:var(--font-mono)}
+</style>
+</head>
+<body>
+
+<div id="lock">
+  <div class="lock-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="10" width="16" height="10" rx="2"></rect>
+      <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+    </svg>
+  </div>
+  <h1 class="lock-title">Girişə icazə tələb olunur</h1>
+  <p class="lock-sub">Bu səhifə şəxsi istifadə üçündür. Davam etmək üçün açar kodu daxil et.</p>
+  <form id="lockForm" autocomplete="off">
+    <input type="password" id="pinInput" placeholder="••••••" inputmode="numeric" autocomplete="off" maxlength="12">
+    <button type="submit">Daxil ol</button>
+  </form>
+  <div id="lockMsg"></div>
+</div>
+
+<div class="bg-canvas" aria-hidden="true">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+
+<main id="dashboard">
+  <header class="dh">
+    <h1>Sistem Jurnalı</h1>
+    <div class="sub">SECURITY GROUP · daxili izləmə</div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><b id="k-total">—</b><span>Cəmi qeyd</span></div>
+    <div class="kpi"><b id="k-visits">—</b><span>Baxış</span></div>
+    <div class="kpi"><b id="k-clicks">—</b><span>Keçid</span></div>
+  </div>
+
+  <div class="filters">
+    <input type="text" id="fSearch" placeholder="Layihə / IP / şəhər axtar…">
+    <select id="fType">
+      <option value="">Bütün hadisələr</option>
+      <option value="page_view">Yalnız baxışlar</option>
+      <option value="project_click">Yalnız keçidlər</option>
+    </select>
+  </div>
+
+  <div class="rows" id="rows"><div class="loading">Yüklənir…</div></div>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+
+/* ---- Giriş qoruması (bu panelə xas, ayrı açar) ---- */
+(function(){
+  const PIN_HASH = '4a0a99ae389425a7935080450a60eb8652d402f6016f3dc6ea4ed634a01f91cf';
+  const LS_KEY = 'sgc_unlocked_v1';
+  const lockEl = document.getElementById('lock');
+  const dashEl = document.getElementById('dashboard');
+  const form = document.getElementById('lockForm');
+  const input = document.getElementById('pinInput');
+  const msg = document.getElementById('lockMsg');
+
+  async function sha256(text){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function unlock(){
+    lockEl.style.display='none';
+    dashEl.style.display='block';
+    window.dispatchEvent(new Event('sg-unlocked'));
+  }
+
+  if(localStorage.getItem(LS_KEY) === '1'){
+    unlock();
+  } else {
+    setTimeout(()=>input.focus(), 300);
+  }
+
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const hash = await sha256(input.value.trim());
+    if(hash === PIN_HASH){
+      localStorage.setItem(LS_KEY, '1');
+      unlock();
+    } else {
+      msg.textContent = 'Kod yanlışdır.';
+      input.value = '';
+      input.focus();
+    }
+  });
+})();
+
+/* ---- Firebase ---- */
+const firebaseConfig = {
+  apiKey: "AIzaSyCBhyGNzZRGgQShP_C9kwAzTm_g_0zJlzg",
+  authDomain: "an-psixoloji-33442.firebaseapp.com",
+  databaseURL: "https://an-psixoloji-33442-default-rtdb.firebaseio.com",
+  projectId: "an-psixoloji-33442",
+  storageBucket: "an-psixoloji-33442.firebasestorage.app",
+  messagingSenderId: "528809299356",
+  appId: "1:528809299356:web:59cae89a64e446dc520c59"
+};
+const app = initializeApp(firebaseConfig, "sg-insight");
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let allEvents = [];
+
+function fmtTime(ts){
+  const d = new Date(ts);
+  return d.toLocaleString('az-AZ', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function render(){
+  const search = document.getElementById('fSearch').value.trim().toLowerCase();
+  const type = document.getElementById('fType').value;
+  let list = allEvents.filter(ev=>{
+    if(type && ev.type !== type) return false;
+    if(search){
+      const hay = [ev.source, ev?.data?.name, ev?.data?.url, ev.ip, ev.city, ev.country].join(' ').toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('k-total').textContent = allEvents.length;
+  document.getElementById('k-visits').textContent = allEvents.filter(e=>e.type==='page_view').length;
+  document.getElementById('k-clicks').textContent = allEvents.filter(e=>e.type==='project_click').length;
+
+  const box = document.getElementById('rows');
+  if(!list.length){
+    box.innerHTML = '<div class="empty">Uyğun qeyd tapılmadı</div>';
+    return;
+  }
+  box.innerHTML = list.slice(0,300).map(ev=>{
+    const isClick = ev.type === 'project_click';
+    const title = isClick ? ('→ ' + (ev?.data?.name || 'Naməlum layihə')) : ('Baxış · ' + (ev.source || ''));
+    const loc = [ev.city, ev.country].filter(Boolean).join(', ') || 'ərazi naməlum';
+    return `<div class="row">
+      <div class="top"><span class="badge ${isClick?'pc':'pv'}">${isClick?'KEÇİD':'BAXIŞ'}</span>${title}</div>
+      <time>${fmtTime(ev.ts)}</time>
+      <div class="meta">
+        <span><b>IP:</b> ${ev.ip||'—'}</span>
+        <span><b>Ərazi:</b> ${loc}</span>
+        <span><b>Mənbə:</b> ${ev.source||'—'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.addEventListener('sg-unlocked', ()=>{
+  signInAnonymously(auth).catch(()=>{});
+  const q = query(ref(db, 'menyu_analytics/events'), limitToLast(1000));
+  onValue(q, (snap)=>{
+    const val = snap.val() || {};
+    allEvents = Object.values(val).sort((a,b)=> (b.ts||0)-(a.ts||0));
+    render();
+  }, ()=>{
+    document.getElementById('rows').innerHTML = '<div class="empty">Verilənlərə qoşulmaq mümkün olmadı</div>';
+  });
+});
+
+document.getElementById('fSearch').addEventListener('input', render);
+document.getElementById('fType').addEventListener('change', render);
+</script>
+</body>
+</html>
