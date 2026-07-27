@@ -153,7 +153,7 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+import { getDatabase, ref, onValue, query, limitToLast, orderByChild, endAt, get, remove } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 /* ---- Giriş qoruması (bu panelə xas, ayrı açar) ---- */
@@ -278,6 +278,19 @@ function withTimeout(promise, ms){
   ]);
 }
 
+const RETENTION_DAYS = 3;
+async function cleanupOldEvents(){
+  try{
+    const cutoff = Date.now() - RETENTION_DAYS*24*60*60*1000;
+    const oldQ = query(ref(db, 'menyu_analytics/events'), orderByChild('ts'), endAt(cutoff));
+    const snap = await get(oldQ);
+    const val = snap.val();
+    if(!val) return;
+    const keys = Object.keys(val);
+    await Promise.all(keys.map(k => remove(ref(db, 'menyu_analytics/events/' + k))));
+  }catch(e){ /* səssiz — təmizləmə uğursuz olsa da panel işləməyə davam etsin */ }
+}
+
 window.addEventListener('sg-unlocked', async ()=>{
   try{
     await withTimeout(signInAnonymously(auth), 8000);
@@ -289,6 +302,7 @@ window.addEventListener('sg-unlocked', async ()=>{
       '</div>';
     return;
   }
+  cleanupOldEvents();
   const q = query(ref(db, 'menyu_analytics/events'), limitToLast(1000));
   onValue(q, (snap)=>{
     const val = snap.val() || {};
