@@ -87,6 +87,11 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
 .badge.tr{background:rgba(74,144,226,.2);color:#8ec4ff}
 .badge.ra{background:rgba(46,204,113,.18);color:#7ee0a3}
 .row .detail{grid-column:1/-1;display:none;margin-top:6px;padding-top:8px;border-top:1px dashed var(--c-border);font-size:12px;color:rgba(242,204,122,.75);font-family:var(--font-mono)}
+.detail-grid{display:flex;flex-direction:column;gap:6px}
+.dgrow{display:flex;gap:8px;align-items:baseline}
+.dl{color:rgba(242,204,122,.5);min-width:88px;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;flex-shrink:0}
+.dv{color:var(--gold-200);font-size:12.5px;word-break:break-word}
+.result-pill{grid-column:1/-1;display:inline-block;width:fit-content;background:rgba(74,144,226,.12);border:1px solid rgba(74,144,226,.3);color:#8ec4ff;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:999px;margin:4px 0 2px}
 .row.open .detail{display:block}
 .row{cursor:pointer}
 .row .meta{grid-column:1/-1;font-size:11.5px;color:rgba(242,204,122,.55);font-family:var(--font-mono);display:flex;flex-wrap:wrap;gap:10px}
@@ -220,6 +225,23 @@ function fmtTime(ts){
   return d.toLocaleString('az-AZ', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 
+function esc(s){ return String(s==null?'—':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function formatDetail(ev){
+  const d = ev.data || {};
+  const row = (label,val) => `<div class="dgrow"><span class="dl">${label}</span><span class="dv">${esc(val)}</span></div>`;
+  if(ev.type === 'test_result'){
+    return `<div class="detail-grid">${row('Test', d.test)}${row('Nəticə', d.result)}${row('Vaxt', fmtTime(ev.ts))}</div>`;
+  }
+  if(ev.type === 'record_added'){
+    return `<div class="detail-grid">${row('Əməliyyat', d.action)}${row('Növ', d.entity)}${row('Ad / Soyad', d.name)}</div>`;
+  }
+  if(ev.type === 'project_click'){
+    return `<div class="detail-grid">${row('Layihə', d.name)}${row('Keçid ünvanı', d.url)}</div>`;
+  }
+  return `<div class="detail-grid">${row('Səhifə', d.path || ev.source)}</div>`;
+}
+
 function render(){
   const search = document.getElementById('fSearch').value.trim().toLowerCase();
   const type = document.getElementById('fType').value;
@@ -251,22 +273,25 @@ function render(){
   };
   box.innerHTML = list.slice(0,300).map((ev,idx)=>{
     const info = badgeInfo[ev.type] || { cls:'pv', label:ev.type.toUpperCase() };
+    const d = ev.data || {};
     let title = ev.source || '';
-    if(ev.type === 'project_click') title = '→ ' + (ev?.data?.name || 'Naməlum layihə');
-    else if(ev.type === 'test_result') title = (ev?.data?.test || 'Test') + ' — ' + (ev?.data?.result || '');
-    else if(ev.type === 'record_added') title = (ev?.data?.entity || 'Qeyd') + ': ' + (ev?.data?.name || '');
+    let resultLine = '';
+    if(ev.type === 'project_click') title = '→ ' + (d.name || 'Naməlum layihə');
+    else if(ev.type === 'test_result'){ title = d.test || 'Test'; resultLine = `<div class="result-pill">📊 ${d.result || '—'}</div>`; }
+    else if(ev.type === 'record_added') title = (d.entity || 'Qeyd') + ': ' + (d.name || '—');
     else title = 'Baxış · ' + title;
     const loc = [ev.city, ev.country].filter(Boolean).join(', ') || 'ərazi naməlum';
     const ipDisplay = ipLabels[ev.ip] ? ('🏷️ ' + ipLabels[ev.ip]) : (ev.ip || '—');
     return `<div class="row" data-idx="${idx}">
       <div class="top"><span class="badge ${info.cls}">${info.label}</span>${title}</div>
+      ${resultLine}
       <time>${fmtTime(ev.ts)}</time>
       <div class="meta">
         <span><b>IP:</b> <span class="ip-tag" data-ip="${ev.ip||''}">${ipDisplay}</span></span>
         <span><b>Ərazi:</b> ${loc}</span>
         <span><b>Mənbə:</b> ${ev.source||'—'}</span>
       </div>
-      <div class="detail">${JSON.stringify(ev.data||{}, null, 0)}</div>
+      <div class="detail">${formatDetail(ev)}</div>
     </div>`;
   }).join('');
 
