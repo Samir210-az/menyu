@@ -241,11 +241,22 @@ function render(){
   }).join('');
 }
 
+function withTimeout(promise, ms){
+  return Promise.race([
+    promise,
+    new Promise((_,reject)=> setTimeout(()=> reject(new Error('TIMEOUT')), ms))
+  ]);
+}
+
 window.addEventListener('sg-unlocked', async ()=>{
   try{
-    await signInAnonymously(auth);
+    await withTimeout(signInAnonymously(auth), 8000);
   }catch(e){
-    document.getElementById('rows').innerHTML = '<div class="empty">Giriş təsdiqlənmədi. Firebase Authentication → Anonymous aktiv olduğundan əmin ol.</div>';
+    const isTimeout = e && e.message === 'TIMEOUT';
+    document.getElementById('rows').innerHTML =
+      '<div class="empty">Giriş cavab vermədi.' +
+      (isTimeout ? '<br><br>Reklam-bloker, VPN və ya "Şəxsi DNS" aktivdirsə, bu saytda söndür və səhifəni yenilə.' : '<br><br>Xəta: ' + (e && e.message ? e.message : 'naməlum')) +
+      '</div>';
     return;
   }
   const q = query(ref(db, 'menyu_analytics/events'), limitToLast(1000));
