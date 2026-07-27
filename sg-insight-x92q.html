@@ -43,11 +43,11 @@ body{
 .lock-title{font-family:var(--font-display);font-weight:800;font-size:20px;letter-spacing:1px;color:var(--gold-200);margin-bottom:6px}
 .lock-sub{font-size:13px;color:rgba(242,204,122,.6);margin-bottom:26px;max-width:280px}
 #lockForm{display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px}
-#pinInput{
+#accessCode{
   background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:14px;padding:14px 16px;
-  color:var(--gold-200);font-family:var(--font-mono);font-size:20px;text-align:center;letter-spacing:6px;outline:none;
+  color:var(--gold-200);font-family:var(--font-mono);font-size:20px;text-align:center;letter-spacing:4px;outline:none;text-transform:uppercase;
 }
-#pinInput:focus{border-color:var(--gold-400)}
+#accessCode:focus{border-color:var(--gold-400)}
 #lockForm button{
   background:linear-gradient(135deg,var(--gold-400),var(--gold-500));border:none;border-radius:14px;padding:13px;
   font-weight:700;font-size:14px;color:#1a0410;cursor:pointer;letter-spacing:.5px;
@@ -109,7 +109,10 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
   <h1 class="lock-title">Girişə icazə tələb olunur</h1>
   <p class="lock-sub">Bu səhifə şəxsi istifadə üçündür. Davam etmək üçün açar kodu daxil et.</p>
   <form id="lockForm" autocomplete="off">
-    <input type="password" id="pinInput" placeholder="••••••" autocomplete="off" maxlength="12">
+    <div style="position:relative">
+      <input type="password" id="accessCode" name="accessCode" placeholder="Kodu daxil et" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" style="width:100%;padding-right:44px">
+      <button type="button" id="toggleEye" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;width:auto;padding:6px;cursor:pointer;color:var(--gold-300);font-size:16px">👁</button>
+    </div>
     <button type="submit">Daxil ol</button>
   </form>
   <div id="lockMsg"></div>
@@ -160,8 +163,13 @@ import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/1
   const lockEl = document.getElementById('lock');
   const dashEl = document.getElementById('dashboard');
   const form = document.getElementById('lockForm');
-  const input = document.getElementById('pinInput');
+  const input = document.getElementById('accessCode');
   const msg = document.getElementById('lockMsg');
+  const eyeBtn = document.getElementById('toggleEye');
+
+  eyeBtn.addEventListener('click', ()=>{
+    input.type = input.type === 'password' ? 'text' : 'password';
+  });
 
   async function sha256(text){
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
@@ -182,7 +190,7 @@ import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/1
 
   form.addEventListener('submit', async (e)=>{
     e.preventDefault();
-    const hash = await sha256(input.value.trim());
+    const hash = await sha256(input.value.trim().toUpperCase());
     if(hash === PIN_HASH){
       localStorage.setItem(LS_KEY, '1');
       unlock();
