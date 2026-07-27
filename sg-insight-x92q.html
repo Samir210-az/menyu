@@ -241,15 +241,20 @@ function render(){
   }).join('');
 }
 
-window.addEventListener('sg-unlocked', ()=>{
-  signInAnonymously(auth).catch(()=>{});
+window.addEventListener('sg-unlocked', async ()=>{
+  try{
+    await signInAnonymously(auth);
+  }catch(e){
+    document.getElementById('rows').innerHTML = '<div class="empty">Giriş təsdiqlənmədi. Firebase Authentication → Anonymous aktiv olduğundan əmin ol.</div>';
+    return;
+  }
   const q = query(ref(db, 'menyu_analytics/events'), limitToLast(1000));
   onValue(q, (snap)=>{
     const val = snap.val() || {};
     allEvents = Object.values(val).sort((a,b)=> (b.ts||0)-(a.ts||0));
     render();
-  }, ()=>{
-    document.getElementById('rows').innerHTML = '<div class="empty">Verilənlərə qoşulmaq mümkün olmadı</div>';
+  }, (err)=>{
+    document.getElementById('rows').innerHTML = '<div class="empty">Verilənlərə qoşulmaq mümkün olmadı: ' + (err && err.message ? err.message : 'naməlum xəta') + '</div>';
   });
 });
 
