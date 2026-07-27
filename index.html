@@ -530,7 +530,6 @@ footer .hl{color:rgba(210,165,93,0.3);}
 /* ---------- Giriş qoruması (PIN) ---------- */
 (function(){
   const PIN_HASH = 'ae049299b033187c4c74ef5fd519277e1f79d19fbf681cc0c66d8506932405ae';
-  const LS_KEY = 'menyu_unlocked_v1';
   const lockEl = document.getElementById('lock');
   const form = document.getElementById('lockForm');
   const input = document.getElementById('pinInput');
@@ -541,17 +540,12 @@ footer .hl{color:rgba(210,165,93,0.3);}
     return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
   }
 
-  if(localStorage.getItem(LS_KEY) === '1'){
-    lockEl.style.display = 'none';
-  } else {
-    setTimeout(()=>input.focus(), 300);
-  }
+  setTimeout(()=>input.focus(), 300);
 
   form.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const hash = await sha256(input.value.trim());
     if(hash === PIN_HASH){
-      localStorage.setItem(LS_KEY, '1');
       lockEl.style.display = 'none';
     } else {
       msg.textContent = 'PIN yanlışdır.';
