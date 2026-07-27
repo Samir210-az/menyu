@@ -87,6 +87,16 @@ async function sgTrackEvent(type, data){
 }
 window.sgTrackEvent = sgTrackEvent;
 
+/* Testlər üçün: yalnız yekun nəticə/bal */
+window.sgTrackTest = function(testName, result){
+  sgTrackEvent("test_result", { test: testName, result: result });
+};
+
+/* Formlarda əlavə edilən qeydlər üçün (yeni xəstə, əməkdaş və s.) */
+window.sgTrackRecord = function(action, entity, name){
+  sgTrackEvent("record_added", { action: action, entity: entity, name: name });
+};
+
 /* Avtomatik səhifə görüntülənməsi */
 sgTrackEvent("page_view", { path: location.pathname });
 
