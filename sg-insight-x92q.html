@@ -91,6 +91,8 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
 .row{cursor:pointer}
 .row .meta{grid-column:1/-1;font-size:11.5px;color:rgba(242,204,122,.55);font-family:var(--font-mono);display:flex;flex-wrap:wrap;gap:10px}
 .row .meta b{color:rgba(242,204,122,.8);font-weight:600}
+.ip-tag{cursor:pointer;text-decoration:underline dotted rgba(242,204,122,.4);text-underline-offset:3px}
+.ip-tag:hover{color:var(--gold-300)}
 .row time{font-size:11px;color:rgba(242,204,122,.4);white-space:nowrap;font-family:var(--font-mono)}
 
 .empty{text-align:center;padding:40px 20px;color:rgba(242,204,122,.4);font-size:13px}
@@ -153,7 +155,7 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getDatabase, ref, onValue, query, limitToLast, orderByChild, endAt, get, remove } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+import { getDatabase, ref, onValue, query, limitToLast, orderByChild, endAt, get, remove, set } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 /* ---- Giriş qoruması (bu panelə xas, ayrı açar) ---- */
@@ -211,6 +213,7 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 let allEvents = [];
+let ipLabels = {};
 
 function fmtTime(ts){
   const d = new Date(ts);
@@ -223,7 +226,7 @@ function render(){
   let list = allEvents.filter(ev=>{
     if(type && ev.type !== type) return false;
     if(search){
-      const hay = [ev.source, ev?.data?.name, ev?.data?.url, ev?.data?.test, ev?.data?.result, ev?.data?.entity, ev.ip, ev.city, ev.country].join(' ').toLowerCase();
+      const hay = [ev.source, ev?.data?.name, ev?.data?.url, ev?.data?.test, ev?.data?.result, ev?.data?.entity, ev.ip, ipLabels[ev.ip], ev.city, ev.country].join(' ').toLowerCase();
       if(!hay.includes(search)) return false;
     }
     return true;
@@ -254,11 +257,12 @@ function render(){
     else if(ev.type === 'record_added') title = (ev?.data?.entity || 'Qeyd') + ': ' + (ev?.data?.name || '');
     else title = 'Baxış · ' + title;
     const loc = [ev.city, ev.country].filter(Boolean).join(', ') || 'ərazi naməlum';
+    const ipDisplay = ipLabels[ev.ip] ? ('🏷️ ' + ipLabels[ev.ip]) : (ev.ip || '—');
     return `<div class="row" data-idx="${idx}">
       <div class="top"><span class="badge ${info.cls}">${info.label}</span>${title}</div>
       <time>${fmtTime(ev.ts)}</time>
       <div class="meta">
-        <span><b>IP:</b> ${ev.ip||'—'}</span>
+        <span><b>IP:</b> <span class="ip-tag" data-ip="${ev.ip||''}">${ipDisplay}</span></span>
         <span><b>Ərazi:</b> ${loc}</span>
         <span><b>Mənbə:</b> ${ev.source||'—'}</span>
       </div>
@@ -268,6 +272,27 @@ function render(){
 
   box.querySelectorAll('.row').forEach((el, i)=>{
     el.addEventListener('click', ()=> el.classList.toggle('open'));
+  });
+
+  box.querySelectorAll('.ip-tag').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const ip = el.dataset.ip;
+      if(!ip || ip === 'naməlum') return;
+      const current = ipLabels[ip] || '';
+      const name = prompt('Bu IP-yə ad ver (' + ip + '):', current);
+      if(name === null) return;
+      const trimmed = name.trim();
+      const key = ip.replace(/[.:]/g, '_');
+      if(trimmed){
+        ipLabels[ip] = trimmed;
+        set(ref(db, 'menyu_analytics/ip_labels/' + key), { ip: ip, name: trimmed });
+      } else {
+        delete ipLabels[ip];
+        remove(ref(db, 'menyu_analytics/ip_labels/' + key));
+      }
+      render();
+    });
   });
 }
 
@@ -303,6 +328,12 @@ window.addEventListener('sg-unlocked', async ()=>{
     return;
   }
   cleanupOldEvents();
+  onValue(ref(db, 'menyu_analytics/ip_labels'), (snap)=>{
+    const val = snap.val() || {};
+    ipLabels = {};
+    Object.values(val).forEach(entry=>{ if(entry && entry.ip) ipLabels[entry.ip] = entry.name; });
+    render();
+  });
   const q = query(ref(db, 'menyu_analytics/events'), limitToLast(1000));
   onValue(q, (snap)=>{
     const val = snap.val() || {};
