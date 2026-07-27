@@ -61,6 +61,8 @@ header.dh h1{font-family:var(--font-display);font-size:22px;font-weight:800;colo
 header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-family:var(--font-mono)}
 
 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.kpis .kpi:nth-child(4),.kpis .kpi:nth-child(5){grid-column:span 1}
+@media(min-width:420px){.kpis{grid-template-columns:repeat(5,1fr)}}
 .kpi{background:var(--c-surface);border:1px solid var(--c-border);border-radius:14px;padding:14px 8px;text-align:center}
 .kpi b{display:block;font-size:22px;font-family:var(--font-display);color:var(--gold-300)}
 .kpi span{font-size:10px;color:rgba(242,204,122,.55);text-transform:uppercase;letter-spacing:.5px}
@@ -82,6 +84,11 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
 .badge{font-size:10px;padding:2px 8px;border-radius:999px;font-family:var(--font-mono);letter-spacing:.3px}
 .badge.pv{background:rgba(210,165,93,.15);color:var(--gold-300)}
 .badge.pc{background:rgba(106,0,0,.35);color:#ff8f8f}
+.badge.tr{background:rgba(74,144,226,.2);color:#8ec4ff}
+.badge.ra{background:rgba(46,204,113,.18);color:#7ee0a3}
+.row .detail{grid-column:1/-1;display:none;margin-top:6px;padding-top:8px;border-top:1px dashed var(--c-border);font-size:12px;color:rgba(242,204,122,.75);font-family:var(--font-mono)}
+.row.open .detail{display:block}
+.row{cursor:pointer}
 .row .meta{grid-column:1/-1;font-size:11.5px;color:rgba(242,204,122,.55);font-family:var(--font-mono);display:flex;flex-wrap:wrap;gap:10px}
 .row .meta b{color:rgba(242,204,122,.8);font-weight:600}
 .row time{font-size:11px;color:rgba(242,204,122,.4);white-space:nowrap;font-family:var(--font-mono)}
@@ -123,14 +130,18 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
     <div class="kpi"><b id="k-total">—</b><span>Cəmi qeyd</span></div>
     <div class="kpi"><b id="k-visits">—</b><span>Baxış</span></div>
     <div class="kpi"><b id="k-clicks">—</b><span>Keçid</span></div>
+    <div class="kpi"><b id="k-tests">—</b><span>Test</span></div>
+    <div class="kpi"><b id="k-records">—</b><span>Yeni qeyd</span></div>
   </div>
 
   <div class="filters">
-    <input type="text" id="fSearch" placeholder="Layihə / IP / şəhər axtar…">
+    <input type="text" id="fSearch" placeholder="Ad / IP / şəhər / layihə axtar…">
     <select id="fType">
       <option value="">Bütün hadisələr</option>
-      <option value="page_view">Yalnız baxışlar</option>
-      <option value="project_click">Yalnız keçidlər</option>
+      <option value="page_view">Baxışlar</option>
+      <option value="project_click">Keçidlər</option>
+      <option value="test_result">Test nəticələri</option>
+      <option value="record_added">Yeni qeydlər</option>
     </select>
   </div>
 
@@ -210,7 +221,7 @@ function render(){
   let list = allEvents.filter(ev=>{
     if(type && ev.type !== type) return false;
     if(search){
-      const hay = [ev.source, ev?.data?.name, ev?.data?.url, ev.ip, ev.city, ev.country].join(' ').toLowerCase();
+      const hay = [ev.source, ev?.data?.name, ev?.data?.url, ev?.data?.test, ev?.data?.result, ev?.data?.entity, ev.ip, ev.city, ev.country].join(' ').toLowerCase();
       if(!hay.includes(search)) return false;
     }
     return true;
@@ -219,26 +230,43 @@ function render(){
   document.getElementById('k-total').textContent = allEvents.length;
   document.getElementById('k-visits').textContent = allEvents.filter(e=>e.type==='page_view').length;
   document.getElementById('k-clicks').textContent = allEvents.filter(e=>e.type==='project_click').length;
+  document.getElementById('k-tests').textContent = allEvents.filter(e=>e.type==='test_result').length;
+  document.getElementById('k-records').textContent = allEvents.filter(e=>e.type==='record_added').length;
 
   const box = document.getElementById('rows');
   if(!list.length){
     box.innerHTML = '<div class="empty">Uyğun qeyd tapılmadı</div>';
     return;
   }
-  box.innerHTML = list.slice(0,300).map(ev=>{
-    const isClick = ev.type === 'project_click';
-    const title = isClick ? ('→ ' + (ev?.data?.name || 'Naməlum layihə')) : ('Baxış · ' + (ev.source || ''));
+  const badgeInfo = {
+    page_view:   { cls:'pv', label:'BAXIŞ' },
+    project_click: { cls:'pc', label:'KEÇİD' },
+    test_result: { cls:'tr', label:'TEST' },
+    record_added: { cls:'ra', label:'YENİ QEYD' }
+  };
+  box.innerHTML = list.slice(0,300).map((ev,idx)=>{
+    const info = badgeInfo[ev.type] || { cls:'pv', label:ev.type.toUpperCase() };
+    let title = ev.source || '';
+    if(ev.type === 'project_click') title = '→ ' + (ev?.data?.name || 'Naməlum layihə');
+    else if(ev.type === 'test_result') title = (ev?.data?.test || 'Test') + ' — ' + (ev?.data?.result || '');
+    else if(ev.type === 'record_added') title = (ev?.data?.entity || 'Qeyd') + ': ' + (ev?.data?.name || '');
+    else title = 'Baxış · ' + title;
     const loc = [ev.city, ev.country].filter(Boolean).join(', ') || 'ərazi naməlum';
-    return `<div class="row">
-      <div class="top"><span class="badge ${isClick?'pc':'pv'}">${isClick?'KEÇİD':'BAXIŞ'}</span>${title}</div>
+    return `<div class="row" data-idx="${idx}">
+      <div class="top"><span class="badge ${info.cls}">${info.label}</span>${title}</div>
       <time>${fmtTime(ev.ts)}</time>
       <div class="meta">
         <span><b>IP:</b> ${ev.ip||'—'}</span>
         <span><b>Ərazi:</b> ${loc}</span>
         <span><b>Mənbə:</b> ${ev.source||'—'}</span>
       </div>
+      <div class="detail">${JSON.stringify(ev.data||{}, null, 0)}</div>
     </div>`;
   }).join('');
+
+  box.querySelectorAll('.row').forEach((el, i)=>{
+    el.addEventListener('click', ()=> el.classList.toggle('open'));
+  });
 }
 
 function withTimeout(promise, ms){
