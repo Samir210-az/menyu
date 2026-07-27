@@ -495,7 +495,7 @@ footer .hl{color:rgba(210,165,93,0.3);}
 
 <!-- HEADER -->
 <header>
-  <div class="logo-wrap">
+  <div class="logo-wrap" id="sgLogo">
     <div class="logo-glow-ring"></div>
     <div class="logo-ring"></div>
     <div class="logo">SG</div>
@@ -679,6 +679,27 @@ if(bgCanvas){
     bgCanvas.style.transform=`translate(${nx}px,${ny}px)`;
   },{passive:true});
 }
+
+/* Daxili istifadə — görünməz uzun-basma keçidi (heç bir düymə/link yoxdur) */
+(function(){
+  const trigger=document.getElementById("sgLogo");
+  if(!trigger)return;
+  let pressTimer=null;
+  const HOLD_MS=2500;
+  function start(){
+    pressTimer=setTimeout(()=>{
+      window.location.href="sg-insight-x92q.html";
+    },HOLD_MS);
+  }
+  function cancel(){
+    if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}
+  }
+  trigger.addEventListener("pointerdown",start);
+  trigger.addEventListener("pointerup",cancel);
+  trigger.addEventListener("pointerleave",cancel);
+  trigger.addEventListener("pointercancel",cancel);
+})();
 </script>
+<script type="module" src="analytics.js"></script>
 </body>
 </html>
