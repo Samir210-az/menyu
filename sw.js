@@ -1,4 +1,4 @@
-const CACHE = "menyu-v5";
+const CACHE = "menyu-v6";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -14,8 +14,13 @@ self.addEventListener("activate", e => {
 });
 
 // Network-first: always try fresh from the web, fall back to cache only when offline.
+// Kənar mənbələrə (Firebase, Google) və gizli statistika panelinə HEÇ müdaxilə etmə —
+// bunlar canlı əlaqə tələb edir, keşlənməsi əlaqəni poza bilər.
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  const url = new URL(e.request.url);
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname.indexOf("sg-insight") !== -1) return;
   e.respondWith(
     fetch(e.request)
       .then(res => {
