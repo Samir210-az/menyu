@@ -86,6 +86,7 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
 .badge.pc{background:rgba(106,0,0,.35);color:#ff8f8f}
 .badge.tr{background:rgba(74,144,226,.2);color:#8ec4ff}
 .badge.ra{background:rgba(46,204,113,.18);color:#7ee0a3}
+.badge.li{background:rgba(255,165,45,.2);color:#ffb84d}
 .row .detail{grid-column:1/-1;display:none;margin-top:6px;padding-top:8px;border-top:1px dashed var(--c-border);font-size:12px;color:rgba(242,204,122,.75);font-family:var(--font-mono)}
 .detail-grid{display:flex;flex-direction:column;gap:6px}
 .dgrow{display:flex;gap:8px;align-items:baseline}
@@ -142,6 +143,7 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
     <div class="kpi"><b id="k-clicks">—</b><span>Keçid</span></div>
     <div class="kpi"><b id="k-tests">—</b><span>Test</span></div>
     <div class="kpi"><b id="k-records">—</b><span>Yeni qeyd</span></div>
+    <div class="kpi"><b id="k-licenses">—</b><span>Lisenziya</span></div>
   </div>
 
   <div class="filters">
@@ -152,6 +154,7 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
       <option value="project_click">Keçidlər</option>
       <option value="test_result">Test nəticələri</option>
       <option value="record_added">Yeni qeydlər</option>
+      <option value="license_activated">Lisenziyalar</option>
     </select>
   </div>
 
@@ -239,6 +242,9 @@ function formatDetail(ev){
   if(ev.type === 'project_click'){
     return `<div class="detail-grid">${row('Layihə', d.name)}${row('Keçid ünvanı', d.url)}</div>`;
   }
+  if(ev.type === 'license_activated'){
+    return `<div class="detail-grid">${row('Kod', d.code)}${row('Müddət', d.tier)}${row('Bitmə tarixi', d.expiry)}${row('Telefon', d.phone)}</div>`;
+  }
   return `<div class="detail-grid">${row('Səhifə', d.path || ev.source)}</div>`;
 }
 
@@ -248,7 +254,7 @@ function render(){
   let list = allEvents.filter(ev=>{
     if(type && ev.type !== type) return false;
     if(search){
-      const hay = [ev.source, ev?.data?.name, ev?.data?.url, ev?.data?.test, ev?.data?.result, ev?.data?.entity, ev.ip, ipLabels[ev.ip], ev.city, ev.country].join(' ').toLowerCase();
+      const hay = [ev.source, ev?.data?.name, ev?.data?.url, ev?.data?.test, ev?.data?.result, ev?.data?.entity, ev?.data?.code, ev?.data?.phone, ev.ip, ipLabels[ev.ip], ev.city, ev.country].join(' ').toLowerCase();
       if(!hay.includes(search)) return false;
     }
     return true;
@@ -259,6 +265,7 @@ function render(){
   document.getElementById('k-clicks').textContent = allEvents.filter(e=>e.type==='project_click').length;
   document.getElementById('k-tests').textContent = allEvents.filter(e=>e.type==='test_result').length;
   document.getElementById('k-records').textContent = allEvents.filter(e=>e.type==='record_added').length;
+  document.getElementById('k-licenses').textContent = allEvents.filter(e=>e.type==='license_activated').length;
 
   const box = document.getElementById('rows');
   if(!list.length){
@@ -269,7 +276,8 @@ function render(){
     page_view:   { cls:'pv', label:'BAXIŞ' },
     project_click: { cls:'pc', label:'KEÇİD' },
     test_result: { cls:'tr', label:'TEST' },
-    record_added: { cls:'ra', label:'YENİ QEYD' }
+    record_added: { cls:'ra', label:'YENİ QEYD' },
+    license_activated: { cls:'li', label:'LİSENZİYA' }
   };
   box.innerHTML = list.slice(0,300).map((ev,idx)=>{
     const info = badgeInfo[ev.type] || { cls:'pv', label:ev.type.toUpperCase() };
@@ -279,6 +287,7 @@ function render(){
     if(ev.type === 'project_click') title = '→ ' + (d.name || 'Naməlum layihə');
     else if(ev.type === 'test_result'){ title = d.test || 'Test'; resultLine = `<div class="result-pill">📊 ${d.result || '—'}</div>`; }
     else if(ev.type === 'record_added') title = (d.entity || 'Qeyd') + ': ' + (d.name || '—');
+    else if(ev.type === 'license_activated'){ title = 'Lisenziya · ' + esc(d.phone || 'telefon yoxdur'); resultLine = `<div class="result-pill">📄 ${esc(d.tier || '—')} · Bitmə: ${esc(d.expiry || '—')} · Kod: ${esc(d.code || '—')}</div>`; }
     else title = 'Baxış · ' + title;
     const loc = [ev.city, ev.country].filter(Boolean).join(', ') || 'ərazi naməlum';
     const ipDisplay = ipLabels[ev.ip] ? ('🏷️ ' + ipLabels[ev.ip]) : (ev.ip || '—');
