@@ -460,6 +460,28 @@ footer .hl{color:rgba(210,165,93,0.3);}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(210,165,93,0.2);border-radius:4px;}
+
+/* ============================================================
+   PLANŞET / KOMPÜTER
+   ============================================================ */
+@media (min-width:700px){
+  main{max-width:820px;padding:12px 24px 20px;}
+  .grid{grid-template-columns:repeat(4,1fr);gap:14px;}
+  .tile{padding:20px 10px 17px;}
+  .tile .ic{font-size:36px;margin-bottom:10px;}
+  .tile .nm{font-size:12.5px;}
+  .sec{font-size:11px;margin:28px 2px 14px;}
+}
+@media (min-width:1024px){
+  main{max-width:1180px;padding:16px 32px 28px;}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:18px;}
+  .tile{padding:26px 12px 22px;}
+  .tile .ic{font-size:46px;margin-bottom:14px;}
+  .tile .nm{font-size:14px;}
+  .sec{font-size:12px;margin:36px 2px 16px;}
+  .stat{padding:9px 24px;font-size:12px;}
+  .stat span{font-size:18px;}
+}
 </style>
 </head>
 <body>
