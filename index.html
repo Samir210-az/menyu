@@ -152,6 +152,8 @@ header{
 }
 
 /* Logo */
+.site-link{display:inline-flex;align-items:center;gap:6px;margin:0 auto 18px;padding:8px 16px;min-height:40px;border:1px solid var(--gold-400);border-radius:999px;color:var(--gold-200);font-size:13px;font-weight:600;letter-spacing:.04em;text-decoration:none;transition:background .25s,color .25s;}
+.site-link:hover,.site-link:focus-visible{background:var(--gold-400);color:#1a1206;outline:none;}
 .logo-wrap{position:relative;width:80px;height:80px;margin:0 auto 16px;}
 .logo-ring{
   position:absolute;inset:-6px;border-radius:26px;
@@ -531,6 +533,7 @@ footer .hl{color:rgba(210,165,93,0.3);}
 
 <!-- HEADER -->
 <header>
+  <a class="site-link" href="https://aze-ai.az" target="_blank" rel="noopener">aze-ai.az ↗</a>
   <div class="logo-wrap" id="sgLogo">
     <div class="logo-glow-ring"></div>
     <div class="logo-ring"></div>
@@ -661,7 +664,10 @@ const oth=[
   {n:"Çayxana",              ic:"🍵", u:"https://cayxana-az.vercel.app"},
   {n:"Sənəd Köməkçisi",       ic:"⚖️", u:"https://sened-az.vercel.app"},
   {n:"Axtarış",               ic:"🔎", u:"https://axtarish-az.vercel.app"},
-  {n:"Sayt Yaradıcı",         ic:"🧱", u:"https://web-sayt-az.vercel.app"}
+  {n:"Sayt Yaradıcı",         ic:"🧱", u:"https://web-sayt-az.vercel.app"},
+  {n:"Xalca",                 ic:"🧼", u:"https://xalca.aze-ai.az"},
+  {n:"Topdançı",              ic:"🛒", u:"https://topdanci-alpha.vercel.app"},
+  {n:"Məktəb",                ic:"🏫", u:"https://mekteb.aze-ai.az"}
 ];
 
 const ANIMS=["lift","pulse","tilt","squeeze","glow","wobble","flip","bounce"];
