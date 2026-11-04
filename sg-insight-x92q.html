@@ -67,6 +67,13 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
 .kpi b{display:block;font-size:22px;font-family:var(--font-display);color:var(--gold-300)}
 .kpi span{font-size:10px;color:rgba(242,204,122,.55);text-transform:uppercase;letter-spacing:.5px}
 
+.skr{background:var(--c-surface);border:1px solid var(--c-border);border-radius:14px;padding:14px;margin-bottom:20px}
+.skr h2{font-size:13px;font-weight:600;color:var(--gold-300);letter-spacing:.4px;margin-bottom:10px}
+.skr .kpis{margin-bottom:12px}
+.skr-sub{font-size:11px;color:rgba(242,204,122,.55);margin:10px 0 6px}
+.skr-line{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:5px 0;border-bottom:1px solid var(--c-border)}
+.skr-line:last-child{border-bottom:0}
+.skr-line b{color:var(--gold-300);font-weight:600}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 .filters input,.filters select{
   flex:1;min-width:110px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;
@@ -145,6 +152,21 @@ header.dh .sub{font-size:12px;color:rgba(242,204,122,.55);margin-top:4px;font-fa
     <div class="kpi"><b id="k-records">—</b><span>Yeni qeyd</span></div>
     <div class="kpi"><b id="k-licenses">—</b><span>Lisenziya</span></div>
   </div>
+
+  <section class="skr" aria-labelledby="skrTitle">
+    <h2 id="skrTitle">AN Skrininq · anonim statistika</h2>
+    <div class="kpis">
+      <div class="kpi"><b id="s-total">—</b><span>Başlayan</span></div>
+      <div class="kpi"><b id="s-done">—</b><span>Tamamlayan</span></div>
+      <div class="kpi"><b id="s-share">—</b><span>Paylaşılan</span></div>
+      <div class="kpi"><b id="s-spec">—</b><span>Mütəxəssis</span></div>
+      <div class="kpi"><b id="s-parent">—</b><span>Valideyn hesabatı</span></div>
+    </div>
+    <div class="skr-sub">Forma növü və yaş qrupu</div>
+    <div id="s-split"></div>
+    <div class="skr-sub">Harada dayanıblar (tamamlamayanlar, son sual)</div>
+    <div id="s-drop"></div>
+  </section>
 
   <div class="filters">
     <input type="text" id="fSearch" placeholder="Ad / IP / şəhər / layihə axtar…">
@@ -350,6 +372,52 @@ async function cleanupOldEvents(){
   }catch(e){ /* səssiz — təmizləmə uğursuz olsa da panel işləməyə davam etsin */ }
 }
 
+const SKR_PATH = 'menyu_analytics/skrininq_sessions';
+function skrLines(rows){
+  if(!rows.length) return '<div class="skr-line"><span>Hələ məlumat yoxdur</span></div>';
+  return rows.map(r=>'<div class="skr-line"><span>'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>').join('');
+}
+function renderSkrininq(sessions){
+  const forms = sessions.filter(s=>s.kind==='form' || s.item || s.done!==undefined);
+  const done = forms.filter(s=>s.done===true);
+  const fmt = (m,b)=>({parent:'Valideyn',teacher:'Müəllim'}[m]||m||'—')+' · '+(b||'—')+' yaş';
+  const set = (id,v)=>{ document.getElementById(id).textContent = v; };
+  set('s-total', forms.length);
+  set('s-done', done.length);
+  set('s-share', sessions.filter(s=>s.shared).length);
+  set('s-spec', sessions.filter(s=>s.kind==='specialist' || s.action).length);
+  set('s-parent', sessions.filter(s=>s.parentReport).length);
+
+  const groups = {};
+  forms.forEach(s=>{
+    const k = fmt(s.mode, s.band);
+    groups[k] = groups[k] || { n:0, d:0 };
+    groups[k].n++;
+    if(s.done===true) groups[k].d++;
+  });
+  document.getElementById('s-split').innerHTML = skrLines(
+    Object.keys(groups).sort().map(k=>[k, groups[k].d+' / '+groups[k].n+' tamamladı'])
+  );
+
+  const stops = {};
+  forms.filter(s=>s.done!==true && s.item).forEach(s=>{
+    const k = fmt(s.mode, s.band)+' · '+s.item;
+    stops[k] = (stops[k]||0)+1;
+  });
+  document.getElementById('s-drop').innerHTML = skrLines(
+    Object.keys(stops).sort((a,b)=>stops[b]-stops[a]).slice(0,10).map(k=>[k, stops[k]])
+  );
+}
+async function cleanupSkrininq(){
+  try{
+    const cutoff = Date.now() - RETENTION_DAYS*24*60*60*1000;
+    const snap = await get(query(ref(db, SKR_PATH), orderByChild('ts'), endAt(cutoff)));
+    const val = snap.val();
+    if(!val) return;
+    await Promise.all(Object.keys(val).map(k => remove(ref(db, SKR_PATH + '/' + k))));
+  }catch(e){ /* təmizləmə uğursuz olsa da panel işləməyə davam etsin */ }
+}
+
 window.addEventListener('sg-unlocked', async ()=>{
   try{
     await withTimeout(signInAnonymously(auth), 8000);
@@ -362,6 +430,12 @@ window.addEventListener('sg-unlocked', async ()=>{
     return;
   }
   cleanupOldEvents();
+  cleanupSkrininq();
+  onValue(query(ref(db, SKR_PATH), limitToLast(500)), (snap)=>{
+    renderSkrininq(Object.values(snap.val() || {}));
+  }, ()=>{
+    document.getElementById('s-split').innerHTML = skrLines([]);
+  });
   onValue(ref(db, 'menyu_analytics/ip_labels'), (snap)=>{
     const val = snap.val() || {};
     ipLabels = {};
