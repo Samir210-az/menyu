@@ -362,6 +362,7 @@ main{
   transition:transform var(--t-mid) var(--ease-back);
 }
 .tile:not([data-anim="flip"]):hover .ic{transform:scale(1.15) translateY(-2px);}
+.tile .ic img{width:1em;height:1em;display:block;margin:0 auto;border-radius:24%;object-fit:cover;}
 
 .tile .nm{
   font-family:var(--font-body);font-size:10.5px;font-weight:700;
@@ -595,38 +596,38 @@ footer .hl{color:rgba(210,165,93,0.3);}
 })();
 
 const psy=[
-  {n:"AN Paketlər",      ic:"📦", u:"https://samir210-az.github.io/an-paketler/"},
+  {n:"AN Paketlər",      ic:"📦", u:"https://samir210-az.github.io/an-paketler/", img:"https://samir210-az.github.io/an-paketler/icon-192.png?v=2"},
   {n:"AN Mərkəz",        ic:"🏛️", u:"https://anpsixoloji.vercel.app"},
   {n:"AN Mərkəz (Yeni)", ic:"🆕",  u:"https://samir210-az.github.io/an-merkezi/"},
-  {n:"M-CHAT-R",         ic:"🔬",  u:"https://samir210-az.github.io/m-chat-r/"},
+  {n:"M-CHAT-R",         ic:"🔬",  u:"https://mchat.aze-ai.az/", img:"https://mchat.aze-ai.az/icon-192.png?v=2"},
   {n:"AN Demo",          ic:"🖥️", u:"https://samir210-az.github.io/demo/"},
-  {n:"TTAP",             ic:"🧩",  u:"https://samir210-az.github.io/AN/"},
+  {n:"TTAP",             ic:"🧩",  u:"https://samir210-az.github.io/AN/", img:"https://samir210-az.github.io/AN/icon-192.png?v=2"},
   {n:"Denver II",        ic:"📋",  u:"https://samir210-az.github.io/goog/"},
-  {n:"Denver Arxiv",     ic:"🗂️", u:"https://samir210-az.github.io/denever/"},
+  {n:"Denver Arxiv",     ic:"🗂️", u:"https://samir210-az.github.io/denever/", img:"https://samir210-az.github.io/denever/icon-192.png?v=2"},
   {n:"Erkən İnkişaf",   ic:"🌱",  u:"https://samir210-az.github.io/TEST/"},
-  {n:"Erkən Müdaxilə",  ic:"🧭",  u:"https://samir210-az.github.io/erken-mudaxile/"},
-  {n:"ABA Terapiya",     ic:"🎯",  u:"https://samir210-az.github.io/aba-terapiya/"},
-  {n:"Qiymətləndirmə Sistemi", ic:"📝", u:"https://samir210-az.github.io/an-qiymetlendirme-sistemi/"},
+  {n:"Erkən Müdaxilə",  ic:"🧭",  u:"https://samir210-az.github.io/erken-mudaxile/", img:"https://samir210-az.github.io/erken-mudaxile/icon-192.png?v=2"},
+  {n:"ABA Terapiya",     ic:"🎯",  u:"https://samir210-az.github.io/aba-terapiya/", img:"https://samir210-az.github.io/aba-terapiya/icon-192.png?v=2"},
+  {n:"Qiymətləndirmə Sistemi", ic:"📝", u:"https://samir210-az.github.io/an-qiymetlendirme-sistemi/", img:"https://samir210-az.github.io/an-qiymetlendirme-sistemi/icon-192.png?v=2"},
   {n:"Fərdi Reabilitasiya Planı", ic:"🗺️", u:"https://samir210-az.github.io/plan/"},
   {n:"Valideyn Reabilitasiya Bələdçisi", ic:"👨‍👩‍👧", u:"https://samir210-az.github.io/plan-valideyn/"},
-  {n:"SCARED Skrininqi",  ic:"🧠",  u:"https://samir210-az.github.io/cbt/"},
+  {n:"SCARED Skrininqi",  ic:"🧠",  u:"https://samir210-az.github.io/cbt/", img:"https://samir210-az.github.io/cbt/icon-192.png?v=2"},
   {n:"CBT Klinik Qiymətləndirmə", ic:"📋", u:"https://samir210-az.github.io/Cbt1/"},
-  {n:"Lisenziya Generatoru", ic:"🔑", u:"https://samir210-az.github.io/lisenziya/"},
-  {n:"NeuroCBT",         ic:"📊",  u:"https://samir210-az.github.io/saas/"},
-  {n:"Səsim",            ic:"🗣️", u:"https://samir210-az.github.io/sesim/"},
-  {n:"AN Agent",         ic:"🤖",  u:"https://samir210-az.github.io/-agent/?v=2/"},
+  {n:"Lisenziya Generatoru", ic:"🔑", u:"https://samir210-az.github.io/lisenziya/", img:"https://samir210-az.github.io/lisenziya/icon-192.png?v=2"},
+  {n:"NeuroCBT",         ic:"📊",  u:"https://samir210-az.github.io/saas/", img:"https://samir210-az.github.io/saas/icon-192.png?v=2"},
+  {n:"Səsim",            ic:"🗣️", u:"https://samir210-az.github.io/sesim/", img:"https://samir210-az.github.io/sesim/icon-192.png?v=2"},
+  {n:"AN Agent",         ic:"🤖",  u:"https://samir210-az.github.io/-agent/?v=2/", img:"https://samir210-az.github.io/-agent/icon-192.png?v=2"},
   {n:"AN Netlify",       ic:"🌐",  u:"https://netlify-samir223.vercel.app"},
-  {n:"Məktəbə Hazırlıq", ic:"🧸",  u:"https://samir210-az.github.io/mektebe-hazirlik/"},
-  {n:"Rus Dili Tədris",  ic:"🇷🇺", u:"https://samir210-az.github.io/an-rus-dili-platform/"},
+  {n:"Məktəbə Hazırlıq", ic:"🧸",  u:"https://samir210-az.github.io/mektebe-hazirlik/", img:"https://samir210-az.github.io/mektebe-hazirlik/assets/icon-192.png?v=2"},
+  {n:"Rus Dili Tədris",  ic:"🇷🇺", u:"https://samir210-az.github.io/an-rus-dili-platform/", img:"https://samir210-az.github.io/an-rus-dili-platform/assets/icon-192.png?v=2"},
   {n:"AN Valideyn Akademiyası", ic:"👨‍👩‍👧‍👦", u:"https://an-valideyn-akademiyasi.vercel.app/"},
-  {n:"Klinika Sistemi",  ic:"🏥",  u:"https://samir210-az.github.io/klinika-sistemi/"},
+  {n:"Klinika Sistemi",  ic:"🏥",  u:"https://samir210-az.github.io/klinika-sistemi/", img:"https://samir210-az.github.io/klinika-sistemi/icon-192.png?v=2"},
   {n:"Mütəxəssis İşi",   ic:"🧑‍⚕️", u:"https://an-seans.vercel.app"},
   {n:"Klinika Demo (B2B)", ic:"🏨", u:"https://samir210-az.github.io/klinika-idareetme-demo/"},
   {n:"UşaqIQ",           ic:"🌈",  u:"https://samir210-az.github.io/usaq_iq/"},
-  {n:"Kurs Portalı",     ic:"🎓",  u:"https://samir210-az.github.io/an-kurs-portali/"},
-  {n:"Koqnitiv Kurs",    ic:"🧩",  u:"https://samir210-az.github.io/koqnitiv_kurs/"},
-  {n:"Kurs 13",          ic:"📘",  u:"https://samir210-az.github.io/kurs_13/"},
-  {n:"Uşaq Psixologiyası Kursu", ic:"🧸", u:"https://samir210-az.github.io/usaq-psixologiyasi-kursu/"},
+  {n:"Kurs Portalı",     ic:"🎓",  u:"https://samir210-az.github.io/an-kurs-portali/", img:"https://samir210-az.github.io/an-kurs-portali/icon-192.png?v=2"},
+  {n:"Koqnitiv Kurs",    ic:"🧩",  u:"https://samir210-az.github.io/koqnitiv_kurs/", img:"https://samir210-az.github.io/koqnitiv_kurs/icon-192.png?v=2"},
+  {n:"Kurs 13",          ic:"📘",  u:"https://samir210-az.github.io/kurs_13/", img:"https://samir210-az.github.io/kurs_13/icon-192.png?v=2"},
+  {n:"Uşaq Psixologiyası Kursu", ic:"🧸", u:"https://samir210-az.github.io/usaq-psixologiyasi-kursu/", img:"https://samir210-az.github.io/usaq-psixologiyasi-kursu/icon-192.png?v=2"},
   {n:"Psixoloji Qiymətləndirmə (AI)", ic:"🧬", u:"https://ai-test-az.vercel.app"},
   {n:"İxtisas Seçimi Testi", ic:"🧑‍🎓", u:"https://ixtisas.vercel.app"},
   {n:"IQ TEST", ic:"🧠", u:"https://iqtest-az.vercel.app/"},
@@ -682,7 +683,7 @@ function build(list,id){
     a.href=p.u;a.target="_blank";a.rel="noopener";
     a.style.animationDelay=(i*0.06)+"s";
     a.dataset.anim=ANIMS[i%ANIMS.length];
-    a.innerHTML=`<span class="ic">${p.ic}</span><span class="nm">${p.n}</span>`;
+    a.innerHTML=`<span class="ic">${p.img?`<img src="${p.img}" alt="" loading="lazy" decoding="async">`:p.ic}</span><span class="nm">${p.n}</span>`;
     // Particle burst on click
     a.addEventListener("pointerdown",function(e){
       for(let k=0;k<6;k++){
