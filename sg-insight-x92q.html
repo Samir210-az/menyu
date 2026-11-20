@@ -267,7 +267,7 @@ function formatDetail(ev){
   if(ev.type === 'license_activated'){
     return `<div class="detail-grid">${row('Kod', d.code)}${row('Müddət', d.tier)}${row('Bitmə tarixi', d.expiry)}${row('Telefon', d.phone)}</div>`;
   }
-  return `<div class="detail-grid">${row('Səhifə', d.path || ev.source)}</div>`;
+  return `<div class="detail-grid">${d.host ? row('Domen', d.host) : ''}${row('Səhifə', d.path || ev.source)}</div>`;
 }
 
 function render(){

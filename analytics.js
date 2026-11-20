@@ -98,7 +98,7 @@ window.sgTrackRecord = function(action, entity, name){
 };
 
 /* Avtomatik səhifə görüntülənməsi */
-sgTrackEvent("page_view", { path: location.pathname });
+sgTrackEvent("page_view", { path: location.pathname, host: location.hostname });
 
 /* menyu-nun layihə kartlarına klik izləməsi (yalnız menyu səhifəsində mövcuddur) */
 document.addEventListener("click", function(e){
