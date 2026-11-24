@@ -89,7 +89,7 @@ window.sgTrackEvent = sgTrackEvent;
 
 /* Testlər üçün: yalnız yekun nəticə/bal */
 window.sgTrackTest = function(testName, result){
-  sgTrackEvent("test_result", { test: testName, result: result });
+  sgTrackEvent("test_result", { test: testName, result: result, host: location.hostname });
 };
 
 /* Formlarda əlavə edilən qeydlər üçün (yeni xəstə, əməkdaş və s.) */
